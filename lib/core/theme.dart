@@ -48,7 +48,6 @@ class AppTheme {
         ),
       ),
       iconTheme: const IconThemeData(color: Colors.white),
-      // You can add more theme properties here as needed
     );
   }
   static ThemeData get lightTheme {
@@ -81,7 +80,6 @@ class AppTheme {
         ),
       ),
       iconTheme: const IconThemeData(color: Colors.blue),
-      // Add more light theme properties
     );
   }
 }
