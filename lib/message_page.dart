@@ -30,6 +30,7 @@ class MessagePage extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               children: [
                 _buildRecentContact('berry',context)
+
               ],
             ) ,
           )
@@ -38,6 +39,7 @@ class MessagePage extends StatelessWidget {
     );
   }
 }
+
 Widget _buildRecentContact(String name,BuildContext context) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -45,9 +47,9 @@ Widget _buildRecentContact(String name,BuildContext context) {
       children: [
         const CircleAvatar(
           radius: 30,
-          backgroundImage: NetworkImage('https://via.placeholder.com/150'), 
+          backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Use backgroundImage for NetworkImage
         ),
-        const SizedBox(height: 5), 
+        const SizedBox(height: 5), // Added const here as SizedBox doesn't depend on any variables
         Text(
           "test",
           style: Theme.of(context).textTheme.bodyMedium,
