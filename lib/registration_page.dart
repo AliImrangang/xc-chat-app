@@ -53,13 +53,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 children: [
                   _buildTextInput('Username', Icons.person, _usernameController),
                   SizedBox(height: 20),
-                  _buildTextInput('Email', Icons.email, _emailController), // Corrected icon
+                  _buildTextInput('Email', Icons.email, _emailController), 
                   SizedBox(height: 20),
                   _buildTextInput(
                     'Password',
                     Icons.lock,
                     _passwordController,
-                    isPassword: true, // Enable password masking
+                    isPassword: true, 
                   ),
                   SizedBox(height: 20),
                   _buildRegisterButton(),
