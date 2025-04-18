@@ -50,13 +50,13 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  _buildTextInput('Email', Icons.email, _emailController), // Corrected icon
+                  _buildTextInput('Email', Icons.email, _emailController), 
                   SizedBox(height: 20),
                   _buildTextInput(
                     'Password',
                     Icons.lock,
                     _passwordController,
-                    isPassword: true, // Enable password masking
+                    isPassword: true, 
                   ),
                   SizedBox(height: 20),
                   _buildRegisterButton(),
