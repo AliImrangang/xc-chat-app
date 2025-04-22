@@ -4,7 +4,7 @@ class LoginPrompt extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
-  const LoginPrompt({super.key, required this.title, required this.Subtitle, required this.onTap});
+  const LoginPrompt({super.key, required this.title, required this.subtitle, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

@@ -1,24 +1,81 @@
+import 'package:chat_app/features/chat/data/datasources/messages_remote_data_source.dart';
+import 'package:chat_app/features/chat/data/repositories/message_repository_impl.dart';
+import 'package:chat_app/features/chat/domain/usecases/fetch_messages_use_case.dart';
+import 'package:chat_app/features/chat/presentation/pages/chat_page.dart';
 import 'package:chat_app/core/theme.dart';
-import 'package:chat_app/login_page.dart';
-import 'package:chat_app/message_page.dart';
-import 'package:chat_app/registration_page.dart';
+import 'package:chat_app/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:chat_app/features/conversation/data/datasources/conversation_remote_data_source.dart';
+import 'package:chat_app/features/conversation/data/repositories/conversations_repository_impl.dart';
+import 'package:chat_app/features/conversation/domain/repositories/conversation_repository.dart';
+import 'package:chat_app/features/conversation/domain/usecases/fetch_conversations_use_case.dart';
+import 'package:chat_app/features/conversation/presentation/bloc/conversations_bloc.dart';
+import 'package:chat_app/features/presentation/bloc/auth_bloc.dart';
+import 'package:chat_app/features/presentation/pages/login_page.dart';
+import 'package:chat_app/features/conversation/presentation/pages/conversations_page.dart';
+import 'package:chat_app/features/presentation/pages/registration_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'features/auth/data/datasources/auth_remote_data_source.dart';
+import 'features/chat/presentation/bloc/chat_bloc.dart';
+import 'features/domain/usercases/login_use_case.dart';
+import 'features/domain/usercases/register_use_case.dart';
 
 void main() {
-  runApp(const MyApp());
+  final authRepository = AuthRepositoryImpl(authRepositoryDataSource: AuthRemoteDataSource());
+  final conversationsRepository = ConversationsRepositoryImpl(conversationRemoteDataSource: ConvesationsRemoteDataSource());
+  final messagesRepository = MessagesRepositoryImpl(remoteDataSource: MessagesRemoteDataSource());
+  runApp(MyApp(authRepository: authRepository,
+    conversationsRepository: conversationsRepository,
+    messagesRepository: messagesRepository,
+  ));
+
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthRepositoryImpl authRepository;
+  final ConversationsRepositoryImpl conversationsRepository;
+  final MessagesRepositoryImpl messagesRepository;
 
-  // This widget is the root of your application.
+
+  const MyApp({super.key, required this.authRepository,
+    required this.conversationsRepository,
+    required this.messagesRepository,
+
+  });
+
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: AppTheme.darkTheme,
-      debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AuthBloc(registerUseCase: RegisterUseCase(repository:authRepository),
+            loginUseCase: LoginUseCase(repository:authRepository))
+        ),
+        BlocProvider(
+            create: (_) => ConversationsBloc(
+              fetchConversationsUseCase: FetchConversationsUseCase(conversationsRepository)
+
+            )
+        ),
+        BlocProvider(
+            create: (_) => ChatBloc(
+             fetchMessagesUseCase: FetchMessagesUseCase(messagesRepository: messagesRepository)
+            )
+        )
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: AppTheme.darkTheme,
+        debugShowCheckedModeBanner: false,
+        home: LoginPage(),
+        routes: {
+          '/login': (_) => LoginPage(),              // fixed space typo
+          '/register': (_) => RegistrationPage(),
+          '/conversationPage': (_) => ConversationsPage(),            // fixed route name to match casing
+        },
+
+      ),
     );
   }
 }
@@ -74,22 +131,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
+
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),

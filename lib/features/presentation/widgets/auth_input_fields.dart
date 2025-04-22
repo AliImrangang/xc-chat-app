@@ -9,7 +9,7 @@ class AuthInputFields extends StatelessWidget {
   final TextEditingController controller;
   final bool isPassword;
 
-  const AuthInputFields({super.key, required this.hint, required this.icon, required this.controller, required this.isPassword});
+  const AuthInputFields({Key? key, required this.hint, required this.icon, required this.controller, this.isPassword = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class AuthInputFields extends StatelessWidget {
           SizedBox(width: 10),
           Expanded(
             child: TextField(
-              controller: usernameController,
+              controller: controller,
               obscureText: isPassword,
               decoration: InputDecoration(
                 hintText: hint,

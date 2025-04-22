@@ -20,7 +20,7 @@ class AuthButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 15,horizontal: 40),
       ),
       child: Text(
-        'Register',
+        text,
         style: TextStyle(color: Colors.white),
       ),
     );;

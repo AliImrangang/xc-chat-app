@@ -1,9 +1,56 @@
 import 'package:chat_app/core/theme.dart';
+import 'package:chat_app/features/chat/presentation/bloc/chat_event.dart';
+import 'package:chat_app/features/chat/presentation/bloc/chat_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../bloc/chat_bloc.dart';
 
 
-class ChatPage extends StatelessWidget {
-  const ChatPage({super.key});
+class ChatPage extends StatefulWidget {
+  final String conversationId;
+  final String mate;
+  const ChatPage({Key? key,required this.conversationId,required this.mate}): super(key:key);
+
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  final TextEditingController _messageController = TextEditingController();
+  final _storage = FlutterSecureStorage();
+  String userId ='';
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<ChatBloc>(context).add(LoadMessagesEvent(widget.conversationId));
+    fetchUserId();
+  }
+  Future<void>fetchUserId()async{
+    userId = await _storage.read(key: 'userId')??'';
+    setState(() {
+      userId= userId;
+
+    });
+
+  }
+@override
+  void dispose() {
+   _messageController.dispose();
+    super.dispose();
+  }
+
+  void _sendMessage() {
+    final content = _messageController.text.trim();
+    if(content.isNotEmpty){
+      BlocProvider.of<ChatBloc>(context).add(
+      SendMessageEvent(widget.conversationId, content),
+    );
+     _messageController.clear();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +62,8 @@ class ChatPage extends StatelessWidget {
               backgroundImage: NetworkImage('https://via.placeholder.com/150'),
             ),
             SizedBox(width: 10,),
-            Text('Danny',
+            Text(
+              '${widget.mate}',
             style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -29,17 +77,39 @@ class ChatPage extends StatelessWidget {
 
       body: Column(
         children: [
-          Expanded(child: ListView(
-            padding: EdgeInsets.all(20),
-            children: [
-              _buildReceivedMessage(context,'Text test'),
-              _buildSentMessage(context,'Text test'),],),
+          Expanded(
+            child:BlocBuilder<ChatBloc,ChatState>(
+              builder: (context,state){
+                if(state is ChatLoadingState){
+                  return Center(child: CircularProgressIndicator(),);
+                }
+                else if(state is ChatLoadedState){
+                 return ListView.builder(
+                   padding: EdgeInsets.all(20),
+                   itemCount: state.messages.length,
+                   itemBuilder: (context,index){
+                     final message = state.messages[index];
+                     final isSentMessage = message.senderId == userId;
+                     if(isSentMessage){
+                       return _buildReceivedMessage(context, message.content);
+                     }
+                   },
+                 );
+              }
+                else if(state is ChatErrorState){
+                  return Center(child: Text(state.message),);
+                }
+                return Center(child: Text('No message found'),);
+
+              },
+            ),
           ),
           _buildMessageInput(),
         ],
       )
     );
   }
+
   Widget _buildReceivedMessage(BuildContext context, String message) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -55,7 +125,7 @@ class ChatPage extends StatelessWidget {
         ),
       ),
     );
-  }}
+  }
   Widget _buildSentMessage(BuildContext context, String message) {
   return Align(
     alignment: Alignment.centerRight,
@@ -90,6 +160,7 @@ class ChatPage extends StatelessWidget {
         ),
         SizedBox(width: 10,),
         Expanded(child: TextField(
+          controller: _messageController,
           decoration:InputDecoration(
             hintText: "Message",
             hintStyle: TextStyle(color: Colors.grey),
@@ -101,10 +172,11 @@ class ChatPage extends StatelessWidget {
             Icons.send,
           color: Colors.grey,
           ),
-          onTap: (){},
+          onTap: _sendMessage,
         )
       ],
     ),
   );
+}
 }
 
