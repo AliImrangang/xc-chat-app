@@ -1,3 +1,4 @@
+import 'package:chat_app/core/socket_services.dart';
 import 'package:chat_app/features/chat/data/datasources/messages_remote_data_source.dart';
 import 'package:chat_app/features/chat/data/repositories/message_repository_impl.dart';
 import 'package:chat_app/features/chat/domain/usecases/fetch_messages_use_case.dart';
@@ -21,7 +22,11 @@ import 'features/chat/presentation/bloc/chat_bloc.dart';
 import 'features/domain/usercases/login_use_case.dart';
 import 'features/domain/usercases/register_use_case.dart';
 
-void main() {
+void main()async {
+  final socketServices = SocketService();
+  await socketServices.initSocket();
+
+
   final authRepository = AuthRepositoryImpl(authRepositoryDataSource: AuthRemoteDataSource());
   final conversationsRepository = ConversationsRepositoryImpl(conversationRemoteDataSource: ConvesationsRemoteDataSource());
   final messagesRepository = MessagesRepositoryImpl(remoteDataSource: MessagesRemoteDataSource());
