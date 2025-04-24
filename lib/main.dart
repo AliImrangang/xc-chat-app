@@ -23,6 +23,8 @@ import 'features/domain/usercases/login_use_case.dart';
 import 'features/domain/usercases/register_use_case.dart';
 
 void main()async {
+
+  WidgetsFlutterBinding.ensureInitialized();
   final socketServices = SocketService();
   await socketServices.initSocket();
 
