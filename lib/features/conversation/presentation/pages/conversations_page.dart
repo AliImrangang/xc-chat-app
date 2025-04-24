@@ -96,6 +96,16 @@ void initState(){
           )
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (context)=>ContactsPage())
+            // );
+          }
+
+
+      ),
     );
   }
 
