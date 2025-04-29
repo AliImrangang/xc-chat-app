@@ -32,6 +32,8 @@ class ChatBloc extends Bloc<ChatEvent,ChatState>{
     _messages.addAll(messages);
     emit(ChatLoadedState(List.from(_messages)));
 
+    _socketService.socket.off('newMessage');
+
 
     _socketService.socket.emit('joinConversation',event.conversationId);
     _socketService.socket.on('newMessage', (data) {
@@ -39,7 +41,7 @@ class ChatBloc extends Bloc<ChatEvent,ChatState>{
       add(ReceiveMessageEvent(data));
     });
   }catch(error){
-emit(ChatErrorState('Failed to load messages'));
+        emit(ChatErrorState('Failed to load messages'));
   }
   }
 
@@ -51,7 +53,7 @@ emit(ChatErrorState('Failed to load messages'));
   final newMessage = {
     'conversationId':event.conversationId,
     'content':event.content,
-    'senderId': event.content,
+    'senderId': userId,
   };
   _socketService.socket.emit('sendMessage',newMessage);
   }
@@ -69,8 +71,5 @@ emit(ChatErrorState('Failed to load messages'));
       createdAt: event.message['created_at']);
   _messages.add(message);
   emit(ChatLoadedState(List.from(_messages)));
-
-
-
   }
 }

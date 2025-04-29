@@ -2,7 +2,7 @@ import 'package:chat_app/features/conversation/domain/entities/conversation_enti
 import 'package:chat_app/features/conversation/domain/repositories/conversation_repository.dart';
 
 class FetchConversationsUseCase{
-  final ConversationRepsitory repository;
+  final ConversationRepository repository;
 
   FetchConversationsUseCase(this.repository);
 

@@ -3,11 +3,8 @@ import 'package:chat_app/features/contacts/domain/entities/contacts_entity.dart'
 import 'package:chat_app/features/contacts/domain/repositories/contacts_repository.dart';
 import 'package:chat_app/features/contacts/domain/entities/contacts_entity.dart';
 
-abstract class ContactRepository {
-  Future<void> addContact({required String email});
-  Future<List<ContactEntity>> fetchContacts();
-}
-class ContactsRepositoryImpl implements ContactRepository {
+
+class ContactsRepositoryImpl implements ContactsRepository {
   final ContactsRemoteDataSource remoteDataSource;
 
   ContactsRepositoryImpl({required this.remoteDataSource});

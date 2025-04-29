@@ -3,11 +3,11 @@ import 'package:chat_app/features/contacts/domain/repositories/contacts_reposito
 
 
 class FetchContactUseCase{
-  final ContactRepository contactRepository;
+  final ContactsRepository contactsRepository;
 
-  FetchContactUseCase({required this.contactRepository});
+  FetchContactUseCase({required this.contactsRepository});
 
-  Future<Future<ContactEntity>> call()async{
-    return await contactRepository.fetchContacts();
+  Future<List<ContactEntity>> call()async{
+    return await contactsRepository.fetchContacts();
   }
 }

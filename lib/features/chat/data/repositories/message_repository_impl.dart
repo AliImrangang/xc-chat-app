@@ -10,10 +10,11 @@ class MessagesRepositoryImpl implements MessagesRepository{
 
   @override
   Future<List<MessageEntity>> fetchMessages(String conversationId) async {
-return await remoteDataSource.fetchMessages(conversationId);
+  return await remoteDataSource.fetchMessages(conversationId);
   }
 
   @override
   Future<void> sendMessage(MessageEntity message) {
     throw UnimplementedError();
-  }}
+  }
+}

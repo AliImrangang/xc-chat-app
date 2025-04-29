@@ -1,8 +1,8 @@
 
 import '../entities/contacts_entity.dart';
 
-abstract class ContactRepository{
-  Future<Future<ContactEntity>> fetchContacts();
+abstract class ContactsRepository{
+  Future<List<ContactEntity>> fetchContacts();
   Future<void> addContact ({required String email});
 
 }

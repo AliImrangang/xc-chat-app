@@ -31,11 +31,18 @@ class ContactsRemoteDataSource {
     final response = await http.post(
       Uri.parse('$baseUrl/contacts'),
       body: jsonEncode({'contactEmail': email}),
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
     );
 
-    if (response.statusCode != 201) {
-      throw Exception('Failed to add contact');
+    if (response.statusCode == 201) {
+      // Success: Do nothing, return success
+    } else {
+      // Capture more error details
+      final errorMessage = response.body.isNotEmpty ? jsonDecode(response.body)['message'] : 'Unknown error';
+      throw Exception('Failed to add contact: $errorMessage');
     }
   }
 

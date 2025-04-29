@@ -5,7 +5,8 @@ class MessageEntity{
   final String content;
   final String createdAt;
 
-  MessageEntity({required this.id,
+  MessageEntity({
+    required this.id,
     required this.conversationId,
     required this.senderId,
     required this.content,

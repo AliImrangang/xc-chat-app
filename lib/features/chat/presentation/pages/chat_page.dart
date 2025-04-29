@@ -1,3 +1,4 @@
+
 import 'package:chat_app/core/theme.dart';
 import 'package:chat_app/features/chat/presentation/bloc/chat_event.dart';
 import 'package:chat_app/features/chat/presentation/bloc/chat_state.dart';
@@ -11,7 +12,7 @@ import '../bloc/chat_bloc.dart';
 class ChatPage extends StatefulWidget {
   final String conversationId;
   final String mate;
-  const ChatPage({Key? key,required this.conversationId,required this.mate}): super(key:key);
+  const ChatPage({Key? key,required this.conversationId,required this.mate}): super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -84,17 +85,20 @@ class _ChatPageState extends State<ChatPage> {
                   return Center(child: CircularProgressIndicator(),);
                 }
                 else if(state is ChatLoadedState){
-                 return ListView.builder(
-                   padding: EdgeInsets.all(20),
-                   itemCount: state.messages.length,
-                   itemBuilder: (context,index){
-                     final message = state.messages[index];
-                     final isSentMessage = message.senderId == userId;
-                     if(isSentMessage){
-                       return _buildReceivedMessage(context, message.content);
-                     }
-                   },
-                 );
+                 return
+                   ListView.builder(
+                     padding: EdgeInsets.all(20),
+                     itemCount: state.messages.length,
+                     itemBuilder: (context, index) {
+                       final message = state.messages[index];
+                       final isSentMessage = message.senderId == userId;
+                       if (isSentMessage) {
+                         return _buildSentMessage(context, message.content);
+                       } else {
+                         return _buildReceivedMessage(context, message.content);
+                       }
+                     },
+                   );
               }
                 else if(state is ChatErrorState){
                   return Center(child: Text(state.message),);
@@ -155,7 +159,7 @@ class _ChatPageState extends State<ChatPage> {
          child: Icon(
            Icons.camera_alt,
            color: Colors.grey,
-         ), 
+         ),
           onTap: (){},
         ),
         SizedBox(width: 10,),
