@@ -3,7 +3,8 @@ class ConversationEntity{
   final String participantName;
   final String lastMessage;
   final DateTime lastMessageTime;
+  final String participantImage;
 
-  ConversationEntity({required this.id, required this.participantName, required this.lastMessage, required this.lastMessageTime});
+  ConversationEntity({required this.participantImage,required this.id, required this.participantName, required this.lastMessage, required this.lastMessageTime});
 
 }

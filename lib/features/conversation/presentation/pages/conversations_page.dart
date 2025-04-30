@@ -42,17 +42,37 @@ class _ConversationsPageState extends State<ConversationsPage> {
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 100,
-            padding: EdgeInsets.all(5),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildRecentContact('berry', context),
-              ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Recent Contacts',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
+           BlocBuilder<ConversationsBloc, ConversationsState>(
+            builder: (context, state) {
+              if (state is RecentContactsLoaded) {
+              } else if (state is RecentContactsLoaded) {
+                return Container(
+                  height: 100,
+                  padding: EdgeInsets.all(5),
+                  child: ListView.builder(
+                    itemCount: state.recentContacts.length,
+                    itemBuilder: (context, index) {
+                      final contact = state.recentContacts[index];
+                      return _buildRecentContact(contact.participantName, contact.participantImage, context);
+                    }
+                  ),
+                );
+              } else if (state is ConversationsError) {
+                return Center(child: Text(state.message));
+              }
+              return Center(child: Text('No conversations found'));
+            },
+          ),
+
           SizedBox(height: 10),
           Expanded(
             child: Container(
@@ -80,12 +100,14 @@ class _ConversationsPageState extends State<ConversationsPage> {
                                 builder: (context) => ChatPage(
                                   conversationId: conversation.id,
                                   mate: conversation.participantName,
+                                  profileImage: conversation.participantImage,
                                 ),
                               ),
                             );
                           },
                           child: _buildMessageTitle(
                             conversation.participantName,
+                            conversation.participantImage,
                             conversation.lastMessage ?? 'No messages yet',
                             conversation.lastMessageTime.toString() ??
                                 'No time available',
@@ -116,12 +138,12 @@ class _ConversationsPageState extends State<ConversationsPage> {
     );
   }
 
-  Widget _buildMessageTitle(String name, String message, String time) {
+  Widget _buildMessageTitle(String name,String profileImage, String message, String time) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       leading: CircleAvatar(
         radius: 30,
-        backgroundImage: NetworkImage('http://via.placeholder.com/150'),
+        backgroundImage: NetworkImage(profileImage),
       ),
       title: Text(
         name,
@@ -139,18 +161,18 @@ class _ConversationsPageState extends State<ConversationsPage> {
     );
   }
 
-  Widget _buildRecentContact(String name, BuildContext context) {
+  Widget _buildRecentContact(String username, String profileImage, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 30,
-            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+            backgroundImage: NetworkImage(profileImage),
           ),
           const SizedBox(height: 5),
           Text(
-            name,
+            username,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],

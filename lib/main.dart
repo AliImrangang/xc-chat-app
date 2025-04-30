@@ -1,3 +1,4 @@
+import 'package:chat_app/features/chat/domain/usecases/fetch_daily_question_usecase.dart';
 import 'package:chat_app/features/conversation/domain/repositories/conversation_repository.dart';
 import 'package:chat_app/features/conversation/domain/usecases/check_or_create_conversation_use_case.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ import 'package:chat_app/features/presentation/pages/login_page.dart';
 import 'package:chat_app/features/presentation/pages/registration_page.dart';
 import 'package:chat_app/features/conversation/presentation/pages/conversations_page.dart';
 
+import 'features/contacts/domain/usecases/fetch_recent_contacts_usecase.dart';
 import 'features/domain/usercases/login_use_case.dart';
 import 'features/domain/usercases/register_use_case.dart';
 
@@ -76,11 +78,13 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (_) => ConversationsBloc(
             fetchConversationsUseCase: FetchConversationsUseCase(conversationsRepository),
+            fetchRecentContactsUseCase: FetchRecentContactsUseCase(contactsRepository: contactsRepository),
           ),
         ),
         BlocProvider(
           create: (_) => ChatBloc(
             fetchMessagesUseCase: FetchMessagesUseCase(messagesRepository: messagesRepository),
+            fetchDailyQuestionUseCase: FetchDailyQuestionUseCase(messagesRepository: messagesRepository)
           ),
         ),
         BlocProvider(

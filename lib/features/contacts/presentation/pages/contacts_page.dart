@@ -27,7 +27,7 @@ class _ContactsPageState extends State<ContactsPage> {
         title: Text('Contacts'),
       ),
       body: BlocListener<ContactsBloc, ContactsState>(
-        listener: (context, state) {
+        listener: (context, state) async{
           final contactsBloc = BlocProvider.of<ContactsBloc>(context);
 
           // Listen for successful contact addition
@@ -47,7 +47,8 @@ class _ContactsPageState extends State<ContactsPage> {
               MaterialPageRoute(
                 builder: (context) => ChatPage(
                   conversationId: state.conversationId,
-                  mate: state.contactName,
+                  mate: state.contact.username,
+                  profileImage: state.contact.profileImage,
                 ),
               ),
             );
@@ -70,7 +71,7 @@ class _ContactsPageState extends State<ContactsPage> {
                     subtitle: Text(contact.email),
                     onTap: () {
                       BlocProvider.of<ContactsBloc>(context).add(
-                        CheckOrCreateConversation(contact.id, contact.username),
+                        CheckOrCreateConversation(contact.id, contact),
                       );
                     },
                   );

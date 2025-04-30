@@ -18,4 +18,9 @@ class ContactsRepositoryImpl implements ContactsRepository {
   Future<List<ContactEntity>> fetchContacts() async {
     return await remoteDataSource.fetchContacts();
   }
+
+  @override
+  Future<List<ContactEntity>> getRecentContacts() async {
+ return await remoteDataSource.fetchRecentContacts();
+  }
 }

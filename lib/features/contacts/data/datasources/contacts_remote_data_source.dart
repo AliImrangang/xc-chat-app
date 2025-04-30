@@ -41,9 +41,23 @@ class ContactsRemoteDataSource {
       // Success: Do nothing, return success
     } else {
       // Capture more error details
-      final errorMessage = response.body.isNotEmpty ? jsonDecode(response.body)['message'] : 'Unknown error';
+      final errorMessage = response.body.isNotEmpty ? jsonDecode(
+          response.body)['message'] : 'Unknown error';
       throw Exception('Failed to add contact: $errorMessage');
     }
   }
 
+  Future<List<ContactsModel>> fetchRecentContacts() async {
+    String token = await _storage.read(key: 'token') ?? '';
+    final response = await http.get(
+      Uri.parse('$baseUrl/contacts/recent'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      List data = jsonDecode(response.body);
+      return data.map((json) => ContactsModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch recent contacts');
+    }
+  }
 }

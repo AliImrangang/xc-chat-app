@@ -1,5 +1,7 @@
 import 'package:chat_app/features/contacts/domain/entities/contacts_entity.dart';
 
+import '../../../conversation/domain/entities/conversation_entity.dart';
+
 abstract class ContactsState{
 }
 
@@ -21,7 +23,8 @@ class ContactsError extends ContactsState{
 class ContactAdded extends ContactsState {}
 class ConversationReady extends ContactsState {
   final String conversationId;
-  final String contactName;
+  final ContactEntity contact;
+  final String profileImage;
 
-  ConversationReady({required this.conversationId, required this.contactName});
+  ConversationReady({required this.profileImage,required this.conversationId, required this.contact});
 }

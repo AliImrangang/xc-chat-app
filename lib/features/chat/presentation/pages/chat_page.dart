@@ -2,17 +2,21 @@
 import 'package:chat_app/core/theme.dart';
 import 'package:chat_app/features/chat/presentation/bloc/chat_event.dart';
 import 'package:chat_app/features/chat/presentation/bloc/chat_state.dart';
+import 'package:chat_app/features/conversation/domain/entities/conversation_entity.dart';
+import 'package:chat_app/features/conversation/presentation/pages/conversations_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../contacts/domain/entities/contacts_entity.dart';
 import '../bloc/chat_bloc.dart';
 
 
 class ChatPage extends StatefulWidget {
   final String conversationId;
   final String mate;
-  const ChatPage({Key? key,required this.conversationId,required this.mate}): super(key: key);
+  final String profileImage;
+  const ChatPage({Key? key,required this.profileImage,required this.conversationId,required this.mate}): super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -22,11 +26,13 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final _storage = FlutterSecureStorage();
   String userId ='';
+  String botId = 'botId';
 
   @override
   void initState() {
     super.initState();
     BlocProvider.of<ChatBloc>(context).add(LoadMessagesEvent(widget.conversationId));
+    BlocProvider.of<ChatBloc>(context).add(LoadDailyQuestionEvent(widget.conversationId));
     fetchUserId();
   }
   Future<void>fetchUserId()async{
@@ -60,7 +66,7 @@ class _ChatPageState extends State<ChatPage> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundImage: NetworkImage(widget.profileImage),
             ),
             SizedBox(width: 10,),
             Text(
@@ -92,9 +98,19 @@ class _ChatPageState extends State<ChatPage> {
                      itemBuilder: (context, index) {
                        final message = state.messages[index];
                        final isSentMessage = message.senderId == userId;
+                       final isDailyQuestion = message.content == botId;
                        if (isSentMessage) {
                          return _buildSentMessage(context, message.content);
-                       } else {
+                       }
+                       else if (isDailyQuestion){
+                          return _buildDailyQuestionMessage(context, message.content);
+                        }
+                        else if (isDailyQuestion) {
+                          return _buildReceivedMessage(context, message.content);
+                       }
+
+
+                       else {
                          return _buildReceivedMessage(context, message.content);
                        }
                      },
@@ -182,5 +198,23 @@ class _ChatPageState extends State<ChatPage> {
     ),
   );
 }
+}
+
+Widget _buildDailyQuestionMessage(BuildContext context, String message) {
+  return Align(
+    alignment: Alignment.center,
+    child: Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: DefaultColors.dailyQuestionMessage,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Text(
+        "Daily Question : $message",
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white60),
+      ),
+    ),
+  );
 }
 

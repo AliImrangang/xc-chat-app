@@ -6,10 +6,12 @@ class ConversationModel extends ConversationEntity {
     required String participantName,
     required String lastMessage,
     required DateTime lastMessageTime,
+    required participantImage,
   }) : super(
     id: id,
     participantName: participantName,
     lastMessageTime: lastMessageTime,
+    participantImage: participantImage,
     lastMessage: lastMessage,
   );
 
@@ -19,9 +21,9 @@ class ConversationModel extends ConversationEntity {
     return ConversationModel(
       id: json['conversation_id'] ?? '',
       participantName: json['participant_name'] ?? '',
+      participantImage: json['participant_image'] ?? 'https://via.placeholder.com/150',
       lastMessage: json['last_message'] ?? 'No messages yet',
-      lastMessageTime: json['last_message_time'] != null
-          ? DateTime.parse(json['last_message_time'])
+      lastMessageTime: json['last_message_time'] != null ? DateTime.parse(json['last_message_time'])
           : DateTime.now(),
     );
   }

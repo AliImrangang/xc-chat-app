@@ -6,10 +6,18 @@ class UserModel extends UserEntity{
     required String username,
     required String email,
     required String token,
-}) : super(id:id,username: username,email: email,token: token);
+    required String profileImage,
+}) : super(id:id,username: username,email: email,token: token,profileImage: profileImage);
   
   
   factory UserModel.fromJson(Map<String, dynamic> json){
-    return UserModel(id: json['id'], username: json['username'], email: json['email'],token: json['token']);
+    return UserModel(
+        id: json['id'],
+        username: json['username'],
+        email: json['email'],
+        token: json['token'],
+      profileImage: json['profile_image'] ?? 'https://via.placeholder.com/150',
+
+    );
   }
 }
