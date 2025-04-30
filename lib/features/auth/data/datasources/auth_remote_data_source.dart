@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:chat_app/core/link_helper.dart';
 import 'package:chat_app/features/auth/data/models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 class AuthRemoteDataSource{
-  final String baseUrl = 'http://10.0.2.2:3000/auth';
+  final String baseUrl = '${LinkHelper.rootUrl}/auth';
 //   Future<UserModel>login({required String email, required String password})async{
 //     final response = await http.post(
 //       Uri.parse('$baseUrl/login'),

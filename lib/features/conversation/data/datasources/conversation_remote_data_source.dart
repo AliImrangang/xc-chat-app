@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'package:chat_app/core/link_helper.dart';
 import 'package:http/http.dart' as http;
 import 'package:chat_app/features/conversation/data/models/conversations_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ConversationRemoteDataSource {
-  final String baseUrl = 'http://10.0.2.2:3000';
   final _storage = FlutterSecureStorage();
 
   Future<List<ConversationModel>> fetchConversations() async {
@@ -17,7 +17,7 @@ class ConversationRemoteDataSource {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/conversations'),
+        Uri.parse('${LinkHelper.rootUrl}/conversations'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -34,7 +34,9 @@ class ConversationRemoteDataSource {
           throw Exception('Failed to decode conversations');
         }
       } else {
-        print('Failed to fetch conversations. Status code: ${response.statusCode}');
+        print(
+          'Failed to fetch conversations. Status code: ${response.statusCode}',
+        );
         throw Exception('Failed to fetch conversations');
       }
     } catch (e) {
@@ -53,7 +55,7 @@ class ConversationRemoteDataSource {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/conversations/check-or-create'),
+        Uri.parse('${LinkHelper.rootUrl}/conversations/check-or-create'),
         body: jsonEncode({'contactId': contactId}),
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +67,9 @@ class ConversationRemoteDataSource {
         var data = jsonDecode(response.body);
         return data['conversationId'];
       } else {
-        print('Failed to check or create conversation. Status code: ${response.statusCode}');
+        print(
+          'Failed to check or create conversation. Status code: ${response.statusCode}',
+        );
         throw Exception('Failed to check or create conversation');
       }
     } catch (e) {
