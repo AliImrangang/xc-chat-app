@@ -28,11 +28,12 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _onLogin(){
+  void _onLogin() {
     BlocProvider.of<AuthBloc>(context).add(
       LoginEvent(
-          email:_emailController.text,
-          password: _passwordController.text),
+        email: _emailController.text,
+        password: _passwordController.text,
+      ),
     );
   }
 
@@ -48,27 +49,53 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  AuthInputFields(hint: 'Email', icon: Icons.email, controller: _emailController),
-                  SizedBox(height: 20),
-                  AuthInputFields(hint: 'Password', icon: Icons.lock, controller: _passwordController,isPassword: true,),
-                  SizedBox(height: 20),
-                  BlocConsumer<AuthBloc,AuthState>(
-                      builder: (context,state){
-                        if (state is AuthLoading){
-                          return Center(child: CircularProgressIndicator(),);}
-                        return AuthButton(text: 'Login', onPressed: _onLogin);
-                      },
-                      listener: (context, state){
-                        if(state is AuthSuccess){
-                          Navigator.pushNamedAndRemoveUntil(context, '/conversationPage',(route)=> false);
-                        }else if (state is AuthFailure){
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
-                        }
-                      }
-
+                  AuthInputFields(
+                    hint: 'Email',
+                    icon: Icons.email,
+                    controller: _emailController,
                   ),
-                  SizedBox(height: 20,),
-                  LoginPrompt(title: "Don't have an account?", subtitle: 'Click here to register', onTap: (){Navigator.pushNamed(context, '/register');})
+                  SizedBox(height: 20),
+                  AuthInputFields(
+                    hint: 'Password',
+                    icon: Icons.lock,
+                    controller: _passwordController,
+                    isPassword: true,
+                  ),
+                  SizedBox(height: 20),
+                  BlocConsumer<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      if (state is AuthLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      return AuthButton(text: 'Login', onPressed: _onLogin);
+                    },
+                    listener: (context, state) {
+                      if (state is AuthSuccess) {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/conversationPage',
+                          (route) => false,
+                        );
+                      } else if (state is AuthFailure) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(state.error)));
+                      }
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  LoginPrompt(
+                    title: "Don't have an account?",
+                    subtitle: 'Click here to register',
+                    onTap: () {
+                      print("Attempting to navigate to register screen");
+                      Navigator.pushNamed(context, '/register').then((_) {
+                        print("Navigation completed or popped");
+                      }).catchError((error) {
+                        print("Navigation error: $error");
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
