@@ -12,11 +12,6 @@ class ConversationsLoaded extends ConversationsState{
 
   ConversationsLoaded(this.conversations);
 }
-class RecentContactsLoaded extends ConversationsState{
-  final List<ConversationEntity> recentContacts;
-
-  RecentContactsLoaded(this.recentContacts);
-}
 
 class ConversationsError extends ConversationsState{
   final String message;

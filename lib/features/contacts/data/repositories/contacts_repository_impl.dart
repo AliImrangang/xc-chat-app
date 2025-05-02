@@ -1,8 +1,6 @@
 import 'package:chat_app/features/contacts/data/datasources/contacts_remote_data_source.dart';
 import 'package:chat_app/features/contacts/domain/entities/contacts_entity.dart';
 import 'package:chat_app/features/contacts/domain/repositories/contacts_repository.dart';
-import 'package:chat_app/features/contacts/domain/entities/contacts_entity.dart';
-
 
 class ContactsRepositoryImpl implements ContactsRepository {
   final ContactsRemoteDataSource remoteDataSource;
@@ -20,7 +18,8 @@ class ContactsRepositoryImpl implements ContactsRepository {
   }
 
   @override
-  Future<List<ContactEntity>> getRecentContacts() async {
- return await remoteDataSource.fetchRecentContacts();
+  Future<List<ContactEntity>> getRecentContacts({required String userId}) async {
+    // Pass userId to the remoteDataSource to fetch recent contacts
+    return await remoteDataSource.fetchRecentContacts(userId: userId);
   }
 }

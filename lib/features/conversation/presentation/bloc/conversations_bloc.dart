@@ -1,5 +1,6 @@
 import 'package:chat_app/core/socket_services.dart';
 import 'package:chat_app/features/contacts/domain/usecases/fetch_recent_contacts_usecase.dart';
+import 'package:chat_app/features/conversation/domain/entities/conversation_entity.dart';
 import 'package:chat_app/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:chat_app/features/conversation/presentation/bloc/conversations_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,14 +10,11 @@ import '../../domain/usecases/fetch_conversations_use_case.dart';
 
 class ConversationsBloc extends Bloc<ConversationsEvent,ConversationsState> {
   final FetchConversationsUseCase fetchConversationsUseCase;
-  final FetchRecentContactsUseCase fetchRecentContactsUseCase;
   final SocketService _socketService = SocketService();
 
-  ConversationsBloc({required this.fetchConversationsUseCase,required this.fetchRecentContactsUseCase})
+  ConversationsBloc({required this.fetchConversationsUseCase})
       :super(ConversationsInitial()) {
     on<FetchConversations>(_onFetchConversations);
-    on <LoadRecentContactEvent>(_onLoadRecentContactsEvent);
-
   }
 
   void _initializeSocketListeners(){
@@ -39,16 +37,7 @@ class ConversationsBloc extends Bloc<ConversationsEvent,ConversationsState> {
     }
   }
 
-  Future<void> _onLoadRecentContactsEvent(LoadRecentContactEvent events,
-      Emitter<ConversationsState> emit) async {
-    emit(ConversationsLoading());
-    try {
-      final recentContacts = await fetchConversationsUseCase();
-      emit(RecentContactsLoaded(recentContacts));
-    } catch (error) {
-      emit(ConversationsError('Failed to load recent contacts'));
-    }
-  }
+
 
   void _onConversationUpdated(data){
    add(FetchConversations()) ;

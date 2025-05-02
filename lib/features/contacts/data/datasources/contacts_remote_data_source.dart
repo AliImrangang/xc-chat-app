@@ -47,13 +47,20 @@ class ContactsRemoteDataSource {
     }
   }
 
-  Future<List<ContactsModel>> fetchRecentContacts() async {
+  Future<List<ContactsModel>> fetchRecentContacts(
+      {required String userId}) async {
     String token = await _storage.read(key: 'token') ?? '';
+
+    // Update the API URL to include the userId in the query parameters
     final response = await http.get(
-      Uri.parse('$baseUrl/contacts/recent'),
-      headers: {'Authorization': 'Bearer $token'},
+      Uri.parse('$baseUrl/contacts/recent?userId=$userId'),
+      // Pass the userId as a query parameter
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
     );
-    if (response.statusCode == 200) {
+
+    if (response.statusCode == 200) { // Successful response is 200, not 201
       List data = jsonDecode(response.body);
       return data.map((json) => ContactsModel.fromJson(json)).toList();
     } else {

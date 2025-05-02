@@ -78,7 +78,6 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (_) => ConversationsBloc(
             fetchConversationsUseCase: FetchConversationsUseCase(conversationsRepository),
-            fetchRecentContactsUseCase: FetchRecentContactsUseCase(contactsRepository: contactsRepository),
           ),
         ),
         BlocProvider(
@@ -92,6 +91,7 @@ class MyApp extends StatelessWidget {
             fetchContactsUseCase: FetchContactUseCase(contactsRepository: contactsRepository),
             addContactUseCase: AddContactUseCase(contactsRepository: contactsRepository),
             checkOrCreateConversationUseCase: CheckOrCreateConversationUseCase(conversationRepository: conversationsRepository),
+            fetchRecentContactsUseCase: FetchRecentContactsUseCase(contactsRepository: contactsRepository)
           ),
         ),
       ],

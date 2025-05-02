@@ -1,11 +1,14 @@
 import 'package:chat_app/core/theme.dart';
 import 'package:chat_app/features/chat/presentation/pages/chat_page.dart';
+import 'package:chat_app/features/contacts/presentation/bloc/contacts_bloc.dart';
+import 'package:chat_app/features/contacts/presentation/bloc/contacts_event.dart';
 import 'package:chat_app/features/conversation/presentation/bloc/conversation_state.dart';
 import 'package:chat_app/features/conversation/presentation/bloc/conversations_bloc.dart';
 import 'package:chat_app/features/conversation/presentation/bloc/conversations_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../contacts/presentation/bloc/contacts_state.dart';
 import '../../../contacts/presentation/pages/contacts_page.dart';
 
 class ConversationsPage extends StatefulWidget {
@@ -20,6 +23,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
   void initState() {
     super.initState();
     BlocProvider.of<ConversationsBloc>(context).add(FetchConversations());
+    BlocProvider.of<ContactsBloc>(context).add(LoadRecentContacts(userId: ''));
   }
 
   @override
@@ -51,22 +55,30 @@ class _ConversationsPageState extends State<ConversationsPage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-           BlocBuilder<ConversationsBloc, ConversationsState>(
+          BlocBuilder<ContactsBloc, ContactsState>(
             builder: (context, state) {
               if (state is RecentContactsLoaded) {
-              } else if (state is RecentContactsLoaded) {
+                if (state.recentContacts.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('No recent contacts', style: Theme.of(context).textTheme.bodyMedium),
+                  );
+                }
                 return Container(
                   height: 100,
                   padding: EdgeInsets.all(5),
                   child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
                     itemCount: state.recentContacts.length,
                     itemBuilder: (context, index) {
                       final contact = state.recentContacts[index];
                       return _buildRecentContact(contact.participantName, contact.participantImage, context);
-                    }
+                    },
                   ),
                 );
-              } else if (state is ConversationsError) {
+              } else if (state is ContactsLoading) {
+                return Center(child: CircularProgressIndicator());
+              } else if (state is ContactsError) {
                 return Center(child: Text(state.message));
               }
               return Center(child: Text('No conversations found'));
