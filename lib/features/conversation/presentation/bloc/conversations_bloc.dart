@@ -7,39 +7,56 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/fetch_conversations_use_case.dart';
 
-
-class ConversationsBloc extends Bloc<ConversationsEvent,ConversationsState> {
+class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
   final FetchConversationsUseCase fetchConversationsUseCase;
   final SocketService _socketService = SocketService();
 
   ConversationsBloc({required this.fetchConversationsUseCase})
-      :super(ConversationsInitial()) {
+      : super(ConversationsInitial()) {
     on<FetchConversations>(_onFetchConversations);
+    on<ConversationUpdatedEvent>(_onConversationUpdated);
+
+    _initializeSocketListeners(); // Ensure socket listeners are set
   }
 
-  void _initializeSocketListeners(){
-    try{
-      _socketService.socket.on('conversationUpdated', _onConversationUpdated);
-
-    }catch(e){
-      print("Error initializing socket listeners : $e");
+  void _initializeSocketListeners() {
+    try {
+      if (_socketService.socket.connected) {
+        print("Socket connected, adding listener...");
+        _socketService.socket.on('conversationUpdated', (data) => add(ConversationUpdatedEvent(data)));
+      } else {
+        print("Socket not connected yet.");
+      }
+    } catch (e) {
+      print("Error initializing socket listeners: $e");
     }
   }
 
-  Future<void> _onFetchConversations(FetchConversations events,
-      Emitter<ConversationsState> emit) async {
+  Future<void> _onFetchConversations(
+      FetchConversations event, Emitter<ConversationsState> emit) async {
     emit(ConversationsLoading());
+
     try {
       final conversations = await fetchConversationsUseCase();
-      emit(ConversationsLoaded(conversations));
+
+      if (conversations.isEmpty) {
+        emit(ConversationsError('No conversations found'));
+      } else {
+        emit(ConversationsLoaded(conversations));
+      }
     } catch (error) {
-      emit(ConversationsError('Failed to load conversations'));
+      print("Error fetching conversations: ${error.toString()}");
+      emit(ConversationsError('Failed to load conversations. Error: ${error.toString()}'));
     }
   }
 
-
-
-  void _onConversationUpdated(data){
-   add(FetchConversations()) ;
+  void _onConversationUpdated(ConversationUpdatedEvent event, Emitter<ConversationsState> emit) {
+    print("Conversation updated, fetching latest...");
+    add(FetchConversations());
   }
+}
+
+class ConversationUpdatedEvent extends ConversationsEvent {
+  final dynamic data;
+  ConversationUpdatedEvent(this.data);
 }

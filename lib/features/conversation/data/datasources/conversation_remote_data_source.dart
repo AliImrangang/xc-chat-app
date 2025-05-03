@@ -17,7 +17,7 @@ class ConversationRemoteDataSource {
 
     try {
       final response = await http.get(
-        Uri.parse('${LinkHelper.rootUrl}/conversations'),
+        Uri.parse('http://10.0.2.2:3000/conversations'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -48,14 +48,15 @@ class ConversationRemoteDataSource {
   Future<String> checkOrCreateConversation({required String contactId}) async {
     String? token = await _storage.read(key: 'token');
 
-    // Ensure the token is not null or empty
     if (token == null || token.isEmpty) {
       throw Exception('Token is missing or empty');
     }
 
     try {
+      print("Checking or creating conversation for contact ID: $contactId");
+
       final response = await http.post(
-        Uri.parse('${LinkHelper.rootUrl}/conversations/check-or-create'),
+        Uri.parse('http://10.0.2.2:3000/conversations/check-or-create'),
         body: jsonEncode({'contactId': contactId}),
         headers: {
           'Content-Type': 'application/json',
@@ -63,18 +64,27 @@ class ConversationRemoteDataSource {
         },
       );
 
+      print("Raw API Response: ${response.body}");
+
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        return data['conversationId'];
+        final List<dynamic> data = jsonDecode(
+            response.body); // ✅ Expecting a list
+        if (data.isEmpty) {
+          throw Exception("API returned an empty list.");
+        }
+
+        return data[0]['conversation_id']
+            .toString(); // ✅ Access first item safely
       } else {
-        print(
-          'Failed to check or create conversation. Status code: ${response.statusCode}',
-        );
-        throw Exception('Failed to check or create conversation');
+        print("Failed to check or create conversation. Status code: ${response
+            .statusCode}");
+        throw Exception(
+            "Failed to check or create conversation. Status Code: ${response
+                .statusCode}");
       }
     } catch (e) {
-      print('Error checking or creating conversation: $e');
-      throw Exception('Failed to check or create conversation: $e');
+      print("Error checking or creating conversation: $e");
+      throw Exception("Failed to check or create conversation: $e");
     }
   }
 }

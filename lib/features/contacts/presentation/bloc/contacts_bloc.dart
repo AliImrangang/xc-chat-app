@@ -32,64 +32,102 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   Future<void> _onLoadRecentContactsEvent(LoadRecentContacts event, Emitter<ContactsState> emit) async {
     emit(ContactsLoading());
     try {
-      // Assuming fetchRecentContactsUseCase requires userId as parameter
-      final userId = event.userId; // Ensure userId is passed in the event
+      final userId = event.userId.trim();
 
-      // Fetch the recent contacts using the use case
+      if (userId.isEmpty) {
+        emit(ContactsError("Invalid user ID"));
+        return;
+      }
+
+      print("Fetching recent contacts for user ID: $userId");
       final List<ConversationEntity> recentContacts = await fetchRecentContactsUseCase(userId: userId);
 
-      // Emit the loaded state with recent contacts
-      emit(RecentContactsLoaded(recentContacts));
+      if (recentContacts.isEmpty) {
+        emit(ContactsError("No recent contacts found"));
+      } else {
+        emit(RecentContactsLoaded(recentContacts));
+      }
     } catch (error) {
-      // Handle errors and emit the error state with a detailed message
-      emit(ContactsError('Failed to fetch recent contacts: ${error.toString()}'));
+      print("Error fetching recent contacts: ${error.toString()}");
+      emit(ContactsError("Failed to fetch recent contacts: ${error.toString()}"));
     }
   }
-
 
   Future<void> _onFetchContacts(FetchContacts event, Emitter<ContactsState> emit) async {
     emit(ContactsLoading());
     try {
+      print("Fetching all contacts...");
       final contacts = await fetchContactsUseCase();
-      emit(ContactsLoaded(contacts));
+
+      if (contacts.isEmpty) {
+        emit(ContactsError("No contacts found"));
+      } else {
+        emit(ContactsLoaded(contacts));
+      }
     } catch (error) {
-      emit(ContactsError('Failed to fetch contacts: ${error.toString()}'));
+      print("Error fetching contacts: ${error.toString()}");
+      emit(ContactsError("Failed to fetch contacts: ${error.toString()}"));
     }
   }
 
   Future<void> _onAddContact(AddContact event, Emitter<ContactsState> emit) async {
     emit(ContactsLoading());
+
     try {
-      await addContactUseCase(email: event.email);
+      final email = event.email.trim();
+
+      if (email.isEmpty || !email.contains('@')) { // ✅ Validate email format
+        print("Invalid email format: $email");
+        emit(ContactsError("Invalid email: Please provide a valid email address."));
+        return;
+      }
+
+      print("Adding contact with email: $email");
+
+      await addContactUseCase(email: email).timeout(
+        Duration(seconds: 10),
+        onTimeout: () => throw Exception("Request timed out. Please try again."),
+      );
+
+      print("Contact added successfully!");
       emit(ContactAdded());
-      add(FetchContacts());
+
+      add(FetchContacts()); // ✅ Refresh contact list after adding a contact
     } catch (error) {
-      // Log the error message
-      print('Error adding contact: $error');
-      emit(ContactsError('Failed to add contact: $error'));
+      print("Error adding contact: ${error.toString()}");
+      emit(ContactsError("Failed to add contact: ${error.toString()}"));
     }
-  }
-
-
-
-
-
-  Future<void> _onCheckOrCreateConversation(CheckOrCreateConversation event, Emitter<ContactsState> emit) async {
+  }  Future<void> _onCheckOrCreateConversation(CheckOrCreateConversation event, Emitter<ContactsState> emit) async {
     try {
       emit(ContactsLoading());
 
-      // Make sure event.contactId is a valid String (UUID)
-      final conversationId = await checkOrCreateConversationUseCase(contactId: event.contactId);
+      final contactId = event.contactId.trim();
+      if (contactId.isEmpty) {
+        emit(ContactsError("Invalid contact ID: Cannot be empty."));
+        return;
+      }
 
-      emit(ConversationReady(conversationId: conversationId, contact: event.contact, profileImage: ''));
+      print("Checking or creating conversation for contact ID: $contactId");
+
+      // ✅ Ensure correct type conversion before passing to use case
+      final formattedContactId = int.tryParse(contactId) ?? contactId; // Handle int vs string issue
+
+      // ✅ Call repository method with properly formatted ID
+      final conversationId = await checkOrCreateConversationUseCase(contactId: formattedContactId.toString());
+
+      if (conversationId.isEmpty) {
+        emit(ContactsError("Conversation could not be created."));
+        return;
+      }
+
+      emit(ConversationReady(
+        conversationId: conversationId,
+        contact: event.contact,
+        profileImage: event.profileImage ?? "https://via.placeholder.com/150", // Handle null case with default image
+      ));
+
     } catch (error) {
-      print('Error starting conversation: $error');
-      emit(ContactsError('Failed to start conversation: $error'));
+      print("Error starting conversation: ${error.toString()}");
+      emit(ContactsError("Failed to start conversation: ${error.toString()}"));
     }
-  }
-
-
-
-
-
-}
+  }}

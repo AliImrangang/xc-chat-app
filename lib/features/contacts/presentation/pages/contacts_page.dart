@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/contacts_bloc.dart';
+import '../../domain/entities/contacts_entity.dart';
 
 class ContactsPage extends StatefulWidget {
   const ContactsPage({super.key});
@@ -23,32 +24,32 @@ class _ContactsPageState extends State<ContactsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Contacts'),
-      ),
+      appBar: AppBar(title: Text('Contacts', style: TextStyle(fontWeight: FontWeight.bold))),
       body: BlocListener<ContactsBloc, ContactsState>(
-        listener: (context, state) async{
+        listener: (context, state) async {
           final contactsBloc = BlocProvider.of<ContactsBloc>(context);
 
-          // Listen for successful contact addition
           if (state is ContactAdded) {
-            // Show success snackbar
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Contact added successfully! ✅')),
+              SnackBar(content: Text('✅ Contact added successfully!')),
             );
-            // Fetch contacts again to update the list
             contactsBloc.add(FetchContacts());
           }
 
-          // Handle conversation ready state
+          if (state is ContactsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('❌ Error: ${state.message}')),
+            );
+          }
+
           if (state is ConversationReady) {
-            var res = Navigator.push(
+            var res = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => ChatPage(
                   conversationId: state.conversationId,
                   mate: state.contact.username,
-                  profileImage: state.contact.profileImage,
+                  profileImage: state.profileImage ?? "",
                 ),
               ),
             );
@@ -66,27 +67,49 @@ class _ContactsPageState extends State<ContactsPage> {
                 itemCount: state.contacts.length,
                 itemBuilder: (context, index) {
                   final contact = state.contacts[index];
-                  return ListTile(
-                    title: Text(contact.username),
-                    subtitle: Text(contact.email),
-                    onTap: () {
-                      BlocProvider.of<ContactsBloc>(context).add(
-                        CheckOrCreateConversation(contact.id, contact),
-                      );
-                    },
+                  return Card(
+                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: contact.profileImage != null
+                            ? NetworkImage(contact.profileImage!)
+                            : AssetImage("assets/default_avatar.png") as ImageProvider,
+                        radius: 25,
+                      ),
+                      title: Text(contact.username, style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(contact.email, style: TextStyle(color: Colors.grey[600])),
+                      onTap: () {
+                        print("Starting conversation with: ${contact.username}");
+                        BlocProvider.of<ContactsBloc>(context).add(
+                          CheckOrCreateConversation(
+                            contactId: contact.id,
+                            contact: contact,
+                            profileImage: contact.profileImage ?? "",
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               );
             } else if (state is ContactsError) {
-              return Center(child: Text(state.message));
+              return Center(
+                child: Text("❌ Error: ${state.message}", style: TextStyle(color: Colors.red, fontSize: 16)),
+              );
             }
-            return Center(child: Text('No contacts found'));
+            return Center(child: Text('No contacts found', style: TextStyle(color: Colors.grey, fontSize: 16)));
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddContactDialog(context),
-        child: Icon(Icons.add),
+        icon: Icon(Icons.person_add, color: Colors.white),
+        label: Text("Add Contact", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blueAccent,
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
     );
   }
@@ -97,27 +120,44 @@ class _ContactsPageState extends State<ContactsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Add contact'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: Text('➕ Add a Contact', style: TextStyle(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: emailController,
-          decoration: InputDecoration(hintText: 'Enter contact email'),
+          decoration: InputDecoration(
+            hintText: 'Enter contact email',
+            prefixIcon: Icon(Icons.email, color: Colors.blueAccent),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          keyboardType: TextInputType.emailAddress,
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Colors.redAccent)),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: () {
               final email = emailController.text.trim();
-              if (email.isNotEmpty) {
-                BlocProvider.of<ContactsBloc>(context).add(AddContact(email));
-                Navigator.pop(context);
+
+              if (email.isEmpty || !email.contains('@')) {
+                print("Attempted to add an invalid email. Request blocked.");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('❌ Please enter a valid email address!')),
+                );
+                return;
               }
+
+              print("Adding new contact: $email");
+              BlocProvider.of<ContactsBloc>(context).add(AddContact(email: email));
+              Navigator.pop(context);
             },
-            child: Text('Add'),
+            icon: Icon(Icons.check, color: Colors.white),
+            label: Text('Add', style: TextStyle(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.greenAccent.shade700,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
           ),
         ],
       ),
